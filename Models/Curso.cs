@@ -7,9 +7,11 @@ namespace Escuela.Models
     public class Curso:ObjetoEscuelaBase
     {
         [Required(ErrorMessage = "El nombre del curso es requerido.")]
-        [StringLength(5)]
+        [StringLength(8)]
         public override string Nombre { get; set; }
+
         public TiposJornada Jornada { get; set; }
+
         public List<Asignatura> Asignaturas{ get; set; }
         public List<Alumno> Alumnos{ get; set; }
 
