@@ -37,9 +37,15 @@ namespace Escuela
             // for ASP.NET Core 3.x and later, add Runtime Razor Compilation if using anything Razor
             services.AddRazorPages().AddRazorRuntimeCompilation();
             services.AddMvc().AddRazorRuntimeCompilation();
-            services.AddDbContext<EscuelaContext>(
+           /* services.AddDbContext<EscuelaContext>(
                 options => options.UseInMemoryDatabase(databaseName: "testDB")
-                );
+                );*/
+
+            string connString = ConfigurationExtensions.GetConnectionString(this.Configuration, "DefaultConnectionstring");
+
+            services.AddDbContext<EscuelaContext>(
+               options => options.UseMySQL(connString)
+               );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -74,7 +80,7 @@ namespace Escuela
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=School}/{action=Index}/{id?}");
+                    pattern: "{controller=EscuelaNeiva}/{action=Index}/{id?}");
             });
         }
     }

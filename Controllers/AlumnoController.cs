@@ -1,134 +1,160 @@
-﻿using System;
-using System.Linq;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Escuela.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using EcuelaNeiva.Models;
+using Escuela.Models;
 
 namespace Escuela.Controllers
 {
     public class AlumnoController : Controller
     {
+        private readonly EscuelaContext _context;
 
-
-        private EscuelaContext _context;
         public AlumnoController(EscuelaContext context)
         {
             _context = context;
         }
 
- 
-
-        public IActionResult Index(string id)
+        // GET: Alumno
+        public async Task<IActionResult> Index()
         {
-            ViewBag.Controller = "Alumno";
+            var escuelaContext = _context.Alumnos.Include(a => a.curso);
+            return View(await escuelaContext.ToListAsync());
+        }
 
-            if (!string.IsNullOrWhiteSpace(id))
+        // GET: Alumno/Details/5
+        public async Task<IActionResult> Details(string id)
+        {
+            if (id == null)
             {
-                var alumno = from alum in _context.Alumnos
-                                 where alum.Id == id
-                                 select alum;
-
-                return alumno.Any() ? View(alumno.SingleOrDefault()) : View("MultiAlumno", _context.Alumnos);
-
-
-            }
-            else
-            {
-                return View("MultiAlumno", _context.Alumnos);
+                return NotFound();
             }
 
-
-        }
-
-
-        public IActionResult MultiAlumno()
-        {
-            ViewBag.Controller = "Alumno";
-            ViewBag.thingDinamy = "La monja";
-            ViewBag.Fecha = DateTime.Now;
-
-            return View("MultiAlumno", _context.Alumnos);
-        }
-
-
-        public IActionResult Edit(string id)
-        {
-            var alumnos = from alum in _context.Alumnos
-                         where alum.Id == id
-                         select alum;
-            Alumno alumno = alumnos.SingleOrDefault();
-
-            return View("edit", alumno);
-        }
-
-        [HttpPost]
-        public IActionResult Edit(Alumno newData, string id)
-        {
-            if (ModelState.IsValid)
+            var alumno = await _context.Alumnos
+                .Include(a => a.curso)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (alumno == null)
             {
-
-                var alumnoSearch = from alum in _context.Alumnos
-                                   where alum.Id == id
-                                   select alum;
-
-                var alumnosS = alumnoSearch.SingleOrDefault();
-
-                alumnosS.Nombre = newData.Nombre;
-               
-                _context.SaveChanges();
-
-                return RedirectToAction("MultiAlumno");
+                return NotFound();
             }
 
-            return View(newData);
-
+            return View(alumno);
         }
 
+        // GET: Alumno/Create
         public IActionResult Create()
         {
-
-            ViewBag.Fecha = DateTime.Now;
-
+            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Id");
             return View();
         }
 
+        // POST: Alumno/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
+        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        public IActionResult Create(Alumno alumno)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("CursoId,Id,Nombre")] Alumno alumno)
         {
+            if (ModelState.IsValid)
+            {
+                _context.Add(alumno);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Id", alumno.CursoId);
+            return View(alumno);
+        }
 
-            ViewBag.Fecha = DateTime.Now;
+        // GET: Alumno/Edit/5
+        public async Task<IActionResult> Edit(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var alumno = await _context.Alumnos.FindAsync(id);
+            if (alumno == null)
+            {
+                return NotFound();
+            }
+            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Id", alumno.CursoId);
+            return View(alumno);
+        }
+
+        // POST: Alumno/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
+        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(string id, [Bind("CursoId,Id,Nombre")] Alumno alumno)
+        {
+            if (id != alumno.Id)
+            {
+                return NotFound();
+            }
 
             if (ModelState.IsValid)
             {
-                //var escuela = _context.Escuelas.FirstOrDefault();
-               // curso.EscuelaId = escuela.Id;
-
-                _context.Alumnos.Add(alumno);
-                _context.SaveChanges();
-
-                return RedirectToAction("MultiAlumno");
+                try
+                {
+                    _context.Update(alumno);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!AlumnoExists(alumno.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
             }
-            else
-            {
-                return View(alumno);
-            }
-
+            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Id", alumno.CursoId);
+            return View(alumno);
         }
 
-        public IActionResult Delete(string id)
+        // GET: Alumno/Delete/5
+        public async Task<IActionResult> Delete(string id)
         {
-            var alumnoSearch = from alum in _context.Alumnos
-                               where alum.Id == id
-                               select alum;
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-            _context.Alumnos.Remove(alumnoSearch.FirstOrDefault());
+            var alumno = await _context.Alumnos
+                .Include(a => a.curso)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (alumno == null)
+            {
+                return NotFound();
+            }
 
-            _context.SaveChanges();
-
-
-            return RedirectToAction("MultiAlumno");
+            return View(alumno);
         }
 
+        // POST: Alumno/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            var alumno = await _context.Alumnos.FindAsync(id);
+            _context.Alumnos.Remove(alumno);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool AlumnoExists(string id)
+        {
+            return _context.Alumnos.Any(e => e.Id == id);
+        }
     }
 }

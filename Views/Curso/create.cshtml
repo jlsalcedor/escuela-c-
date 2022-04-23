@@ -1,44 +1,53 @@
-﻿
 @model Curso
 
 @{
-    ViewData["Title"] = "Creación de Curso";
-    Layout = "Simple";
+    ViewData["Title"] = "Create";
 }
 
-<h1>@ViewData["Title"] </h1>
+<h1>Create</h1>
 
-
-
-<div asp-validation-summary="All"></div>
-<form method="post">
-
-    <div>
-        <label asp-for="Nombre" > </label>
-        <input asp-for="Nombre" />
+<h4>Curso</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Nombre" class="control-label"></label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Jornada" class="control-label"></label>
+                @Html.DropDownList("TiposJornada", Html.GetEnumSelectList<TiposJornada>(), "Seleccione Tipo Jornada", new { @class = "form-control" })
+                <span asp-validation-for="Jornada" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Dirección" class="control-label"></label>
+                <input asp-for="Dirección" class="form-control" />
+                <span asp-validation-for="Dirección" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EscuelaId" class="control-label"></label>
+                <input asp-for="EscuelaId" class="form-control" />
+                <span asp-validation-for="EscuelaId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Id" class="control-label"></label>
+                <input asp-for="Id" class="form-control" />
+                <span asp-validation-for="Id" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
     </div>
+</div>
 
-    <div>
-        <label asp-for="Dirección"> </label>
-        <input asp-for="Dirección" />
-    </div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
 
-    <div>
-        <label asp-for="Jornada">  </label>
-
-        @Html.DropDownList(
-            "Jornada", Html.GetEnumSelectList<TiposJornada>(),
-            new { @class = "form-control" }
-        )
-
-
-    </div>
-
-
-    <input type="submit" />
-
-
-</form>
-
-
-<h5> @ViewData["Fecha"] </h5>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
