@@ -48,7 +48,7 @@ namespace Escuela.Controllers
         // GET: Alumno/Create
         public IActionResult Create()
         {
-            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Id");
+            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Nombre");
             return View();
         }
 
@@ -82,7 +82,7 @@ namespace Escuela.Controllers
             {
                 return NotFound();
             }
-            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Id", alumno.CursoId);
+            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Nombre", alumno.CursoId);
             return View(alumno);
         }
 
